@@ -8036,10 +8036,8 @@ struct llm_build_context {
         
         if (SD_NUM == 0) {
             if (RMEH == false) {
-                printf("SD_NUM=0, RMEH=false : %d\n", batch.n_tokens);
                 inpL = llm_build_inp_embd(ctx0, lctx, hparams, batch, model.tok_embd, cb);
             } else {
-                printf("SD_NUM=0, RMEH=true : %d\n", batch.n_tokens);
                 n_tokens = batch.n_tokens;
                 inpL = ggml_new_tensor_4d(ctx0, GGML_TYPE_F32, hparams.n_embd, batch.n_tokens, 1, 1);
             }
