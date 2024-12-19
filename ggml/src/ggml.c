@@ -4601,6 +4601,8 @@ static struct ggml_tensor * ggml_mul_impl(
         struct ggml_tensor * b,
         bool inplace) {
     GGML_ASSERT(ggml_can_repeat(b, a));
+    printf("a = %d %d %d %d\n", a->ne[0], a->ne[1], a->ne[2], a->ne[3]);
+    printf("b = %d %d %d %d\n", b->ne[0], b->ne[1], b->ne[2], b->ne[3]);
 
     bool is_node = false;
 
