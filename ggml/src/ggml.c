@@ -4600,9 +4600,10 @@ static struct ggml_tensor * ggml_mul_impl(
         struct ggml_tensor * a,
         struct ggml_tensor * b,
         bool inplace) {
-    GGML_ASSERT(ggml_can_repeat(b, a));
     printf("a = %d %d %d %d\n", a->ne[0], a->ne[1], a->ne[2], a->ne[3]);
     printf("b = %d %d %d %d\n", b->ne[0], b->ne[1], b->ne[2], b->ne[3]);
+    GGML_ASSERT(ggml_can_repeat(b, a));
+
 
     bool is_node = false;
 
@@ -18815,19 +18816,19 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         unsigned cpu, node_;
         syscall(__NR_getcpu, &cpu, &node_, NULL);
 
-        // #pragma omp critical
-        // {
-        // printf("=======================================\n");
-        // printf("%s\n", node->name);
-        // printf("%s\n", ggml_op_to_string(node->op));
-        // printf("%dth thread among %d threads\n", state->ith, state->shared->n_threads);
-        // printf("current_core = %d\n", cpu);
-        // printf("compute_duration: %f ms\n", compute_duration);
-        // printf("sync_duration: %f ms\n", sync_duration);
-        // printf("sum_of_duration: %f ms\n", compute_duration + sync_duration);
-        // printf("\n");
-        // printf("=======================================\n\n");
-        // }
+        #pragma omp critical
+        {
+        printf("=======================================\n");
+        printf("%s\n", node->name);
+        printf("%s\n", ggml_op_to_string(node->op));
+        printf("%dth thread among %d threads\n", state->ith, state->shared->n_threads);
+        printf("current_core = %d\n", cpu);
+        printf("compute_duration: %f ms\n", compute_duration);
+        printf("sync_duration: %f ms\n", sync_duration);
+        printf("sum_of_duration: %f ms\n", compute_duration + sync_duration);
+        printf("\n");
+        printf("=======================================\n\n");
+        }
 
         if (state->shared->ec != GGML_STATUS_SUCCESS) {
             break;
