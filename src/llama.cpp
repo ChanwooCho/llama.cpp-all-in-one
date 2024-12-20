@@ -10213,17 +10213,18 @@ struct llm_build_context {
             // input for next layer
             inpL = cur;
         }
-        
+        printf("\n!!!!!llama.cpp - build_ph3 - end1!!!!!\n");
         cur = llm_build_norm(ctx0, inpL, hparams,
             model.output_norm,
             NULL,
             LLM_NORM_RMS, cb, -1);
         cb(cur, "result_norm", -1);
-
+        printf("\n!!!!!llama.cpp - build_ph3 - end2 - RMEH = %d!!!!!\n", RMEH);
         if (RMEH == false)
             cur = ggml_mul_mat(ctx0, model.output, cur);
-
+        printf("\n!!!!!llama.cpp - build_ph3 - end3!!!!!\n");
         cb(cur, "result_output", -1);
+        printf("\n!!!!!llama.cpp - build_ph3 - end4!!!!!\n");
         ggml_build_forward_expand(gf, cur);
 
         return gf;
