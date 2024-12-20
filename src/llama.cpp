@@ -5670,6 +5670,10 @@ static bool llm_load_tensors(
                                 model.output = ml.create_tensor(ctx_output, tn(LLM_TENSOR_TOKEN_EMBD, "weight"), {n_embd, n_vocab}, llama_model_loader::TENSOR_DUPLICATED);
                             }
                         }
+                    }  else {
+                        model.tok_embd = NULL;
+                        model.output_norm = NULL;
+                        model.output = NULL;
                     }
 
                     for (int i = 0; i < n_layer; ++i) {
