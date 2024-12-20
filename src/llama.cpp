@@ -12587,12 +12587,12 @@ static struct ggml_cgraph * llama_build_graph(
         default:
             GGML_ASSERT(false);
     }
-
+    printf("\n!!!!!llama.cpp - append_pooling - start!!!!!\n");
     // add on pooling layer
     if (lctx.cparams.embeddings) {
         result = llm.append_pooling(result);
     }
-
+    printf("\n!!!!!llama.cpp - append_pooling - end!!!!!\n");
     llm.free();
 
     return result;
