@@ -10128,6 +10128,7 @@ struct llm_build_context {
                 struct ggml_tensor * Vcur = nullptr;
 
                 if (model.layers[il].wqkv) {
+                    printf("\n==wqkv==\n");
                     cur = ggml_mul_mat(ctx0, model.layers[il].wqkv, attn_norm_output);
                     cb(cur, "wqkv", il);
                     Qcur = ggml_cont(ctx0, ggml_view_2d(ctx0, cur, NUM_ATTN_HEAD * 128,     n_tokens, cur->nb[1], 0 * sizeof(float) * (NUM_ATTN_HEAD * 128)));
@@ -10186,6 +10187,7 @@ struct llm_build_context {
             // special-case: the up and gate tensors are merged into a single tensor
             // TOOD: support into llm_build_ffn
             {
+                printf("\n==ffn1==\n");
                 struct ggml_tensor* up = ggml_mul_mat(ctx0, model.layers[il].ffn_up, cur);
                 cb(up, "ffn_up", il);
 
@@ -10194,7 +10196,8 @@ struct llm_build_context {
 
                 y = ggml_mul(ctx0, y, ggml_silu(ctx0, g));
                 cb(y, "ffn_gate", il);
-
+                
+                printf("\n==ffn2==\n");
                 auto down = ggml_mul_mat(ctx0, model.layers[il].ffn_down, y);
                 cb(down, "ffn_down", il);
 
