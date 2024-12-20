@@ -10110,8 +10110,9 @@ struct llm_build_context {
         struct ggml_tensor * KQ_mask = build_inp_KQ_mask();
 
         for (int il = 0; il < n_layer; ++il) {
+            printf("\n====current decoder layer = %d====\n", il);
             auto residual = inpL;
-
+            
             // self-attention
             {
                 // rope freq factors for 128k context
