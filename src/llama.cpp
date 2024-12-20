@@ -10118,7 +10118,6 @@ struct llm_build_context {
         struct ggml_tensor * KQ_mask = build_inp_KQ_mask();
 
         for (int il = 0; il < n_layer; ++il) {
-            printf("\n====current decoder layer = %d====\n", il);
             auto residual = inpL;
             
             // self-attention
@@ -10137,7 +10136,6 @@ struct llm_build_context {
                 struct ggml_tensor * Vcur = nullptr;
 
                 if (model.layers[il].wqkv) {
-                    printf("\n==wqkv==\n");
                     cur = ggml_mul_mat(ctx0, model.layers[il].wqkv, attn_norm_output);
                     cb(cur, "wqkv", il);
                     Qcur = ggml_cont(ctx0, ggml_view_2d(ctx0, cur, NUM_ATTN_HEAD * 128,     n_tokens, cur->nb[1], 0 * sizeof(float) * (NUM_ATTN_HEAD * 128)));
@@ -10196,7 +10194,6 @@ struct llm_build_context {
             // special-case: the up and gate tensors are merged into a single tensor
             // TOOD: support into llm_build_ffn
             {
-                printf("\n==ffn1==\n");
                 struct ggml_tensor* up = ggml_mul_mat(ctx0, model.layers[il].ffn_up, cur);
                 cb(up, "ffn_up", il);
 
@@ -10206,7 +10203,6 @@ struct llm_build_context {
                 y = ggml_mul(ctx0, y, ggml_silu(ctx0, g));
                 cb(y, "ffn_gate", il);
                 
-                printf("\n==ffn2==\n");
                 auto down = ggml_mul_mat(ctx0, model.layers[il].ffn_down, y);
                 cb(down, "ffn_down", il);
                 cur = down;
@@ -10219,7 +10215,6 @@ struct llm_build_context {
             // input for next layer
             inpL = cur;
         }
-        printf("\n!!!!!llama.cpp - build_ph3 - llm_build_norm!!!!!\n");
         cur = llm_build_norm(ctx0, inpL, hparams,
             model.output_norm,
             NULL,
@@ -12591,12 +12586,10 @@ static struct ggml_cgraph * llama_build_graph(
         default:
             GGML_ASSERT(false);
     }
-    printf("\n!!!!!llama.cpp - append_pooling - start!!!!!\n");
     // add on pooling layer
     if (lctx.cparams.embeddings) {
         result = llm.append_pooling(result);
     }
-    printf("\n!!!!!llama.cpp - append_pooling - end!!!!!\n");
     llm.free();
 
     return result;
@@ -17414,8 +17407,6 @@ void llama_free_model(struct llama_model * model) {
 struct llama_context * llama_new_context_with_model(
                  struct llama_model * model,
         struct llama_context_params   params) {
-
-    printf("\n!!!!!llama.cpp - llama_new_context_with_model!!!!!\n"); 
     
     if (!model) {
         LLAMA_LOG_ERROR("%s: model cannot be NULL\n", __func__);
@@ -17745,21 +17736,19 @@ struct llama_context * llama_new_context_with_model(
                 LLAMA_LOG_INFO("%s: pipeline parallelism enabled (n_copies=%d)\n", __func__, ggml_backend_sched_get_n_copies(ctx->sched));
             }
 
-            printf("\n!!!!!llama.cpp - end1!!!!!\n");
             // build worst-case graph
             int n_tokens = (int)std::min(cparams.n_ctx, cparams.n_ubatch);
             int n_past = cparams.n_ctx - n_tokens;
             llama_token token = llama_token_bos(&ctx->model); // not actually used by llama_build_graph, but required to choose between token and embedding inputs graph
             ggml_cgraph * gf = llama_build_graph(*ctx, llama_batch_get_one(&token, n_tokens, n_past, 0), true);
             
-            printf("\n!!!!!llama.cpp - end2!!!!!\n");
             // initialize scheduler with the worst-case graph
             if (!ggml_backend_sched_reserve(ctx->sched, gf)) {
                 LLAMA_LOG_ERROR("%s: failed to allocate compute buffers\n", __func__);
                 llama_free(ctx);
                 return nullptr;
             }
-            printf("\n!!!!!llama.cpp - end3!!!!!\n");
+
             for (size_t i = 0; i < ctx->backends.size(); i++) {
                 ggml_backend_t backend = ctx->backends[i];
                 ggml_backend_buffer_type_t buft = backend_buft[i];
@@ -17770,7 +17759,6 @@ struct llama_context * llama_new_context_with_model(
                             size / 1024.0 / 1024.0);
                 }
             }
-            printf("\n!!!!!llama.cpp - end4!!!!!\n");
             // note: the number of splits during measure is higher than during inference due to the kv shift
             int n_splits = ggml_backend_sched_get_n_splits(ctx->sched);
             LLAMA_LOG_INFO("%s: graph nodes  = %d\n", __func__, gf->n_nodes);
