@@ -17411,6 +17411,8 @@ struct llama_context * llama_new_context_with_model(
                  struct llama_model * model,
         struct llama_context_params   params) {
 
+    printf("\n!!!!!llama.cpp - llama_new_context_with_model!!!!!\n"); 
+    
     if (!model) {
         LLAMA_LOG_ERROR("%s: model cannot be NULL\n", __func__);
         return nullptr;
@@ -17739,19 +17741,21 @@ struct llama_context * llama_new_context_with_model(
                 LLAMA_LOG_INFO("%s: pipeline parallelism enabled (n_copies=%d)\n", __func__, ggml_backend_sched_get_n_copies(ctx->sched));
             }
 
+            printf("\n!!!!!llama.cpp - end1!!!!!\n");
             // build worst-case graph
             int n_tokens = (int)std::min(cparams.n_ctx, cparams.n_ubatch);
             int n_past = cparams.n_ctx - n_tokens;
             llama_token token = llama_token_bos(&ctx->model); // not actually used by llama_build_graph, but required to choose between token and embedding inputs graph
             ggml_cgraph * gf = llama_build_graph(*ctx, llama_batch_get_one(&token, n_tokens, n_past, 0), true);
-
+            
+            printf("\n!!!!!llama.cpp - end2!!!!!\n");
             // initialize scheduler with the worst-case graph
             if (!ggml_backend_sched_reserve(ctx->sched, gf)) {
                 LLAMA_LOG_ERROR("%s: failed to allocate compute buffers\n", __func__);
                 llama_free(ctx);
                 return nullptr;
             }
-
+            printf("\n!!!!!llama.cpp - end3!!!!!\n");
             for (size_t i = 0; i < ctx->backends.size(); i++) {
                 ggml_backend_t backend = ctx->backends[i];
                 ggml_backend_buffer_type_t buft = backend_buft[i];
@@ -17762,7 +17766,7 @@ struct llama_context * llama_new_context_with_model(
                             size / 1024.0 / 1024.0);
                 }
             }
-
+            printf("\n!!!!!llama.cpp - end4!!!!!\n");
             // note: the number of splits during measure is higher than during inference due to the kv shift
             int n_splits = ggml_backend_sched_get_n_splits(ctx->sched);
             LLAMA_LOG_INFO("%s: graph nodes  = %d\n", __func__, gf->n_nodes);
