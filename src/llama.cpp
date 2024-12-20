@@ -10200,31 +10200,34 @@ struct llm_build_context {
                 
                 printf("\n==ffn2==\n");
                 auto down = ggml_mul_mat(ctx0, model.layers[il].ffn_down, y);
+                printf("\n!!!!!llama.cpp - build_ph3 - end1!!!!!\n");
                 cb(down, "ffn_down", il);
-
+                printf("\n!!!!!llama.cpp - build_ph3 - end2!!!!!\n");
                 cur = down;
                 cb(cur, "ffn_out", il);
             }
-
+            printf("\n!!!!!llama.cpp - build_ph3 - end3!!!!!\n");
             cur = ggml_add(ctx0, residual, cur);
+            printf("\n!!!!!llama.cpp - build_ph3 - end4!!!!!\n");
             cur = lctx.cvec.apply_to(ctx0, cur, il);
+            printf("\n!!!!!llama.cpp - build_ph3 - end5!!!!!\n");
             cb(cur, "l_out", il);
 
             // input for next layer
             inpL = cur;
         }
-        printf("\n!!!!!llama.cpp - build_ph3 - end1!!!!!\n");
+        printf("\n!!!!!llama.cpp - build_ph3 - end6!!!!!\n");
         cur = llm_build_norm(ctx0, inpL, hparams,
             model.output_norm,
             NULL,
             LLM_NORM_RMS, cb, -1);
         cb(cur, "result_norm", -1);
-        printf("\n!!!!!llama.cpp - build_ph3 - end2 - RMEH = %d!!!!!\n", RMEH);
+        printf("\n!!!!!llama.cpp - build_ph3 - end7 - RMEH = %d!!!!!\n", RMEH);
         if (RMEH == false)
             cur = ggml_mul_mat(ctx0, model.output, cur);
-        printf("\n!!!!!llama.cpp - build_ph3 - end3!!!!!\n");
+        printf("\n!!!!!llama.cpp - build_ph3 - end8!!!!!\n");
         cb(cur, "result_output", -1);
-        printf("\n!!!!!llama.cpp - build_ph3 - end4!!!!!\n");
+        printf("\n!!!!!llama.cpp - build_ph3 - end9!!!!!\n");
         ggml_build_forward_expand(gf, cur);
 
         return gf;
