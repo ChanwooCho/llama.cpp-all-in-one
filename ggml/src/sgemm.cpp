@@ -444,6 +444,7 @@ class tinyBLAS {
         // 수정
         unsigned int before;
         unsigned int interval;
+        unsigned int interval_sum = 0;
         
         for (int64_t job = start; job < end; ++job) {
             // 수정
@@ -461,11 +462,10 @@ class tinyBLAS {
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
             // 수정
-            if (job == end - 1) {
-                interval = timeUs() - before;
-                printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
-            }
+            interval = timeUs() - before;
+            interval_sum += interval
         }
+        printf("average job interval time = %dus\n", interval_sum / (end - start));
     }
 
     const TA *const A;
@@ -570,7 +570,7 @@ class tinyBLAS_Q0_ARM {
         // 수정
         unsigned int before;
         unsigned int interval;
-        
+        unsigned int interval_sum = 0;
         for (int64_t job = start; job < end; ++job) {
             // 수정
             before = timeUs();
@@ -594,11 +594,10 @@ class tinyBLAS_Q0_ARM {
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
 
             // 수정
-            if (job == end - 1) {
-                interval = timeUs() - before;
-                printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
-            }
+            interval = timeUs() - before;
+            interval_sum += interval;
         }
+        printf("average job interval time = %dus\n", interval_sum / (end - start));
     }
 
     inline int8x16_t load_lo(const block_q8_0 *b) {
