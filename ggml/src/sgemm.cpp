@@ -559,7 +559,6 @@ class tinyBLAS_Q0_ARM {
 
     template <int RM, int RN>
     NOINLINE void gemm(int64_t m0, int64_t m, int64_t n0, int64_t n) {
-        printf("ARM!\n");
         int64_t ytiles = (m - m0) / RM;
         int64_t xtiles = (n - n0) / RN;
         int64_t tiles = xtiles * ytiles;
@@ -770,7 +769,16 @@ class tinyBLAS_Q0_AVX {
         int64_t end = start + duty;
         if (end > tiles)
             end = tiles;
+
+        // 수정
+        unsigned int before;
+        unsigned int interval;
+        unsigned int interval_sum;
+        interval_sum = 0;
+        
         for (int64_t job = start; job < end; ++job) {
+            // 수정
+            before = timeUs();
             int64_t ii = m0 + job / xtiles * RM;
             int64_t jj = n0 + job % xtiles * RN;
             __m256 Cv[RN][RM] = {};
@@ -807,7 +815,11 @@ class tinyBLAS_Q0_AVX {
             for (int64_t j = 0; j < RN; ++j)
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
+            // 수정
+            interval = timeUs() - before;
+            interval_sum += interval;
         }
+        printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval_sum / (end - start));
     }
 
     inline __m256i load(const block_q8_0 *b) {
