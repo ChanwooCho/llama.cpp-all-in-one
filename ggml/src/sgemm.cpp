@@ -420,7 +420,7 @@ class tinyBLAS {
         int64_t duty = (tiles + nth - 1) / nth;
         int64_t start = duty * ith;
         int64_t end = start + duty;
-        printf("KN = %d\n", KN);
+        // printf("KN = %d\n", KN);
         // // Load Balancing with 4 Cores /////////////////////////////////////////////////////////
 
         // int64_t mid_duty = tiles * 0.2;      // CPU #4 ~ #6
