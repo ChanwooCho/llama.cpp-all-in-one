@@ -441,10 +441,12 @@ class tinyBLAS {
             end = tiles;
 
         // check possiblitiy for overlapping communication       
+        // 수정
         unsigned int before;
         unsigned int interval;
         
         for (int64_t job = start; job < end; ++job) {
+            // 수정
             before = timeUs();
             int64_t ii = m0 + job / xtiles * RM;
             int64_t jj = n0 + job % xtiles * RN;
@@ -458,9 +460,11 @@ class tinyBLAS {
             for (int64_t j = 0; j < RN; ++j)
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
-            
-            interval = timeUs() - before;
-            printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
+            // 수정
+            if (job == end - 1) {
+                interval = timeUs() - before;
+                printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
+            }
         }
     }
 
@@ -563,10 +567,12 @@ class tinyBLAS_Q0_ARM {
         if (end > tiles)
             end = tiles;
 
+        // 수정
         unsigned int before;
         unsigned int interval;
         
         for (int64_t job = start; job < end; ++job) {
+            // 수정
             before = timeUs();
             int64_t ii = m0 + job / xtiles * RM;
             int64_t jj = n0 + job % xtiles * RN;
@@ -587,8 +593,11 @@ class tinyBLAS_Q0_ARM {
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
 
-            interval = timeUs() - before;
-            printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
+            // 수정
+            if (job == end - 1) {
+                interval = timeUs() - before;
+                printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
+            }
         }
     }
 
