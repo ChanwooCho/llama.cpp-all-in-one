@@ -51,6 +51,7 @@
 #include "sgemm.h"
 #include "ggml-impl.h"
 #include "ggml-quants.h"
+#include <sys/time.h>
 
 #ifdef _MSC_VER
 #define NOINLINE __declspec(noinline)
@@ -70,6 +71,12 @@ namespace {
 
 inline float unhalf(ggml_fp16_t d) {
     return GGML_FP16_TO_FP32(d);
+}
+
+unsigned long timeUs() {
+    struct timeval te; 
+    gettimeofday(&te, NULL);
+    return te.tv_sec * 1000000LL + te.tv_usec;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -432,8 +439,13 @@ class tinyBLAS {
 
         if (end > tiles)
             end = tiles;
+
+        // check possiblitiy for overlapping communication       
+        unsigned int before;
+        unsigned int interval;
         
         for (int64_t job = start; job < end; ++job) {
+            before = timeUs();
             int64_t ii = m0 + job / xtiles * RM;
             int64_t jj = n0 + job % xtiles * RN;
             D Cv[RN][RM] = {};
@@ -446,6 +458,9 @@ class tinyBLAS {
             for (int64_t j = 0; j < RN; ++j)
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
+            
+            interval = timeUs() - before;
+            printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
         }
     }
 
@@ -547,7 +562,12 @@ class tinyBLAS_Q0_ARM {
         int64_t end = start + duty;
         if (end > tiles)
             end = tiles;
+
+        unsigned int before;
+        unsigned int interval;
+        
         for (int64_t job = start; job < end; ++job) {
+            before = timeUs();
             int64_t ii = m0 + job / xtiles * RM;
             int64_t jj = n0 + job % xtiles * RN;
             float32x4_t Cv[RN][RM] = {};
@@ -566,6 +586,9 @@ class tinyBLAS_Q0_ARM {
             for (int64_t j = 0; j < RN; ++j)
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
+
+            interval = timeUs() - before;
+            printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval);
         }
     }
 
