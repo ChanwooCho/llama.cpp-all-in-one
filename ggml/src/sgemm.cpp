@@ -776,9 +776,10 @@ class tinyBLAS_Q0_AVX {
         unsigned int interval_sum;
         interval_sum = 0;
         
+        // 수정
+        before = timeUs();
         for (int64_t job = start; job < end; ++job) {
-            // 수정
-            before = timeUs();
+
             int64_t ii = m0 + job / xtiles * RM;
             int64_t jj = n0 + job % xtiles * RN;
             __m256 Cv[RN][RM] = {};
@@ -815,11 +816,10 @@ class tinyBLAS_Q0_AVX {
             for (int64_t j = 0; j < RN; ++j)
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
-            // 수정
-            interval = timeUs() - before;
-            interval_sum += interval;
+
         }
-        printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval_sum / (end - start));
+        interval = timeUs() - before;
+        printf("RM = %d, RN = %d, # of jobs = %d, time_for_one_patch = %dus\n", RM, RN, end-start, interval);
     }
 
     inline __m256i load(const block_q8_0 *b) {
