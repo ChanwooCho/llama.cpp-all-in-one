@@ -445,11 +445,12 @@ class tinyBLAS {
         unsigned int before;
         unsigned int interval;
         unsigned int interval_sum;
-        interval_sum = 0;
         
+        interval_sum = 0;
+        before = timeUs();
         for (int64_t job = start; job < end; ++job) {
             // 수정
-            before = timeUs();
+
             int64_t ii = m0 + job / xtiles * RM;
             int64_t jj = n0 + job % xtiles * RN;
             D Cv[RN][RM] = {};
@@ -463,10 +464,10 @@ class tinyBLAS {
                 for (int64_t i = 0; i < RM; ++i)
                     C[ldc * (jj + j) + (ii + i)] = hsum(Cv[j][i]);
             // 수정
-            interval = timeUs() - before;
-            interval_sum += interval;
+            
         }
-        printf("RM = %d, RN = %d, time_for_one_patch = %dus\n", RM, RN, interval_sum / (end - start));
+        interval = timeUs() - before;
+        printf("RM = %d, RN = %d, # of jobs = %d, time_for_one_patch = %dus\n", RM, RN, end - star, tinterval_sum / (end - start));
     }
 
     const TA *const A;
