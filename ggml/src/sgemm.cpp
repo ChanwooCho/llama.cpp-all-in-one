@@ -467,7 +467,7 @@ class tinyBLAS {
             
         }
         interval = timeUs() - before;
-        printf("RM = %d, RN = %d, # of jobs = %d, time_for_one_patch = %dus\n", RM, RN, end - star, tinterval_sum / (end - start));
+        printf("RM = %d, RN = %d, # of jobs = %d, time_for_one_patch = %dus\n", RM, RN, end - star, interval);
     }
 
     const TA *const A;
