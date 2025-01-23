@@ -18807,7 +18807,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         ggml_compute_forward(&params, node);
         // double end_time = omp_get_wtime();
 
-        double compute_duration = (end_time - start_time) * 1000;
+        // double compute_duration = (end_time - start_time) * 1000;
 
         if (state->ith == 0 && cplan->abort_callback && cplan->abort_callback(cplan->abort_callback_data)) {
             state->shared->ec = GGML_STATUS_ABORTED;
