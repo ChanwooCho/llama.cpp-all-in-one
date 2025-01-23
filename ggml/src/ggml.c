@@ -18793,14 +18793,19 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         /*.shared=*/ state->shared,
     };
 
+    char attn_name[] = "attn_norm";
+    char ffn_name[] = "ffn_norm";
+    double attn_start_time = 0;
+    double ffn_start_time = 0;
+
     for (int node_n = 0; node_n < cgraph->n_nodes; node_n++) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
 
         // Record the start time before computation
         
-        double start_time = omp_get_wtime();
+        // double start_time = omp_get_wtime();
         ggml_compute_forward(&params, node);
-        double end_time = omp_get_wtime();
+        // double end_time = omp_get_wtime();
 
         double compute_duration = (end_time - start_time) * 1000;
 
@@ -18808,28 +18813,53 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             state->shared->ec = GGML_STATUS_ABORTED;
         }
 
-        double sync_start_time = omp_get_wtime();
+        // double sync_start_time = omp_get_wtime();
         ggml_barrier(state->shared);
-        double sync_end_time = omp_get_wtime();
+        // double sync_end_time = omp_get_wtime();
 
-        double sync_duration = (sync_end_time - sync_start_time) * 1000;
+        // double sync_duration = (sync_end_time - sync_start_time) * 1000;
 
         // Print the duration of the synchronization for this node
         unsigned cpu, node_;
         syscall(__NR_getcpu, &cpu, &node_, NULL);
 
-        #pragma omp critical
-        {
-        printf("=======================================\n");
-        printf("%s\n", node->name);
-        printf("%s\n", ggml_op_to_string(node->op));
+        // #pragma omp critical
+        // {
+        // printf("=======================================\n");
+        // printf("%s\n", node->name);
+        // printf("%s\n", ggml_op_to_string(node->op));
         // printf("%dth thread among %d threads\n", state->ith, state->shared->n_threads);
         // printf("current_core = %d\n", cpu);
         // printf("compute_duration: %f ms\n", compute_duration);
         // printf("sync_duration: %f ms\n", sync_duration);
         // printf("sum_of_duration: %f ms\n", compute_duration + sync_duration);
         // printf("\n");
-        printf("=======================================\n\n");
+        // printf("=======================================\n\n");
+        // }
+
+        // detect attention normalization
+        int count = 0;
+        for (int i = 0; i < 9; i++) {
+            if (node->name[i] == attn_name[i]) 
+                count++;
+        }
+        if (count == 9){
+            attn_start_time = omp_get_wtime();
+            if (ffn_start_time != 0)
+                printf("FFN TIME = %fms\n", (omp_get_wtime() - ffn_start_time) * 1000);
+      
+        }
+        
+        // detect feed forward normalization
+        count = 0;
+        for (int i = 0; i < 8; i++) {
+            if (node->name[i] == ffn_name[i]) 
+                count++;
+        }
+        if (count == 8) {
+            ffn_start_time = omp_get_wtime();
+            if (attn_start_time != 0)
+                printf("ATTN TIME = %fms\n", (omp_get_wtime() - attn_start_time) * 1000);
         }
 
         if (state->shared->ec != GGML_STATUS_SUCCESS) {
