@@ -18795,6 +18795,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
 
     char attn_name[] = "attn_norm";
     char ffn_name[] = "ffn_norm";
+    char l_out[] = "l_out";
     double attn_start_time = 0;
     double ffn_start_time = 0;
 
@@ -18845,9 +18846,6 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         }
         if (count == 9){
             attn_start_time = omp_get_wtime();
-            if (ffn_start_time != 0)
-                printf("FFN TIME = %fms\n", (omp_get_wtime() - ffn_start_time) * 1000);
-      
         }
         
         // detect feed forward normalization
@@ -18858,8 +18856,19 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         }
         if (count == 8) {
             ffn_start_time = omp_get_wtime();
-            if (attn_start_time != 0)
+            if (attn_start_time != 0) 
                 printf("ATTN TIME = %fms\n", (omp_get_wtime() - attn_start_time) * 1000);
+        }
+        
+        // detect classification
+        count = 0;
+        for (int i = 0; i < 5; i++) {
+            if (node->name[i] == l_out[i]) 
+                count++;
+        }
+        if (count == 5) {
+            if (ffn_start_time != 0)
+                printf("FFN TIME = %fms\n", (omp_get_wtime() - ffn_start_time) * 1000);
         }
 
         if (state->shared->ec != GGML_STATUS_SUCCESS) {
