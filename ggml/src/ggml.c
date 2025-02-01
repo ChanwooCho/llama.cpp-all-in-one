@@ -18862,7 +18862,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         if (count == 8) {
             ffn_start_time = omp_get_wtime();
             if (attn_start_time != 0){
-                attn_sum_time += (omp_get_wtime() - attn_start_time);
+                attn_sum_time += (omp_get_wtime() - attn_start_time) * 1000;
                 count_attn += 1;
                 // printf("ATTN TIME = %fms\n", (omp_get_wtime() - attn_start_time) * 1000);
             }
@@ -18876,7 +18876,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         }
         if (count == 5) {
             if (ffn_start_time != 0){
-                ffn_sum_time += (omp_get_wtime() - ffn_start_time);
+                ffn_sum_time += (omp_get_wtime() - ffn_start_time) * 1000;
                 count_ffn += 1;
                 // printf("FFN TIME = %fms\n", (omp_get_wtime() - ffn_start_time) * 1000);
             }
