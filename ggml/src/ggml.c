@@ -18797,7 +18797,11 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
     char ffn_name[] = "ffn_norm";
     char l_out[] = "l_out";
     double attn_start_time = 0;
+    double attn_sum_time = 0;
+    double count_attn = 0;
     double ffn_start_time = 0;
+    double ffn_sum_time = 0;
+    double count_ffn = 0;
 
     for (int node_n = 0; node_n < cgraph->n_nodes; node_n++) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
@@ -18857,8 +18861,11 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         }
         if (count == 8) {
             ffn_start_time = omp_get_wtime();
-            if (attn_start_time != 0) 
-                printf("ATTN TIME = %fms\n", (omp_get_wtime() - attn_start_time) * 1000);
+            if (attn_start_time != 0){
+                attn_sum_time += (omp_get_wtime() - attn_start_time);
+                count_attn += 1;
+                // printf("ATTN TIME = %fms\n", (omp_get_wtime() - attn_start_time) * 1000);
+            }
         }
         
         // detect classification
@@ -18868,15 +18875,19 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
                 count++;
         }
         if (count == 5) {
-            if (ffn_start_time != 0)
-                printf("FFN TIME = %fms\n", (omp_get_wtime() - ffn_start_time) * 1000);
+            if (ffn_start_time != 0){
+                ffn_sum_time += (omp_get_wtime() - ffn_start_time);
+                count_ffn += 1;
+                // printf("FFN TIME = %fms\n", (omp_get_wtime() - ffn_start_time) * 1000);
+            }
         }
 
         if (state->shared->ec != GGML_STATUS_SUCCESS) {
             break;
         }
     }
-
+    printf("AVG ATTN TIME = %fms\n", attn_sum_time / count_attn);
+    printf("AVG FFN TIME = %fms\n", ffn_sum_time / count_ffn);
     return 0;
 }
 
